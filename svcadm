@@ -25,7 +25,7 @@
 _gen_zoneadm_list()
 {
     if [[ ${prev} =~ "-z" ]]; then
-        local zones="$(zoneadm list -c | grep -v '^global$')"
+        local zones="$(zoneadm list -n)"
         COMPREPLY=( $(compgen -W "${zones}" -- ${cur}) )
     fi
 }
