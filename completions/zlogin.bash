@@ -1,4 +1,4 @@
-# OpenIndiana zones(5) completion                           -*- shell-script -*-
+# OpenIndiana zlogin(1) completion                          -*- shell-script -*-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2013, Jonathan Perkin <jperkin@joyent.com>
 # Copyright (c) 2018, Michal Nowak <mnowak@startmail.com>
@@ -36,43 +36,7 @@ _zlogin()
     fi
 }
 
-_dash_z_zone()
-{
-    local cur prev
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    prev="${COMP_WORDS[COMP_CWORD-1]}"
-
-    if [[ ${prev} =~ "-z" ]]; then
-      local zones="$(zoneadm list -n $*)"
-      COMPREPLY=( $(compgen -W "${zones}" -- ${cur}) )
-    fi
-}
-
-_dash_z_zone_running() { _dash_z_zone; }
-_dash_z_zone_configured() { _dash_z_zone -c; }
-
-# Many illumos utilities are zone-aware through the -z option
-
 complete -F _zlogin zlogin
-complete -F _dash_z_zone_running allocate
-complete -F _dash_z_zone_running deallocate
-complete -F _dash_z_zone_running ipfs
-complete -F _dash_z_zone_running ipfstat
-complete -F _dash_z_zone_running ipmon
-complete -F _dash_z_zone_running ipnat
-complete -F _dash_z_zone_running ippool
-complete -F _dash_z_zone_running pgrep
-complete -F _dash_z_zone_running pkill
-complete -F _dash_z_zone_running ps
-complete -F _dash_z_zone_running psrset
-complete -F _dash_z_zone_running ptree
-complete -F _dash_z_zone_running svccfg
-complete -F _dash_z_zone_running svcprop
-complete -F _dash_z_zone_running wall
-
-complete -F _dash_z_zone_configured auditreduce
-complete -F _dash_z_zone_configured zoneadm
-complete -F _dash_z_zone_configured zonecfg
 
 # ex: filetype=sh
 # vim: tabstop=2 shiftwidth=2 expandtab smartindent
