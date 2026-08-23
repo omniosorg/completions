@@ -1,0 +1,65 @@
+#compdef bootadm
+# Copyright 2026 OmniOS Community Edition (OmniOSce) Association.
+
+_bootadm() {
+	local context state line expl
+	typeset -A opt_args
+	local -a subcmds
+
+	subcmds=(
+		update-archive list-archive install-bootloader set-menu
+		list-menu
+	)
+
+	if [[ $service == "bootadm" ]]; then
+		_arguments -C -A "-*" \
+			'*::command:->subcmd' && return 0
+
+		if (( CURRENT == 1 )); then
+			_wanted commands expl "bootadm subcommand" compadd -a subcmds
+			return
+		fi
+		service="$words[1]"
+		curcontext="${curcontext%:*}=$service:"
+	fi
+
+	case $service in
+	("update-archive")
+		_arguments -A "-*" \
+			'-v[Verbose]' \
+			'-n[Dry run]' \
+			'-f[Force update]' \
+			'-R[Alternate root]:alternate root:_path_files -/' \
+			'-p[Platform]:platform:(i86pc sun4u sun4v)' \
+			'-F[Archive format]:format:(cpio hsfs ufs ufs-nocompress)'
+		;;
+
+	("list-archive")
+		_arguments -A "-*" \
+			'-R[Alternate root]:alternate root:_path_files -/' \
+			'-p[Platform]:platform:(i86pc sun4u sun4v)'
+		;;
+
+	("install-bootloader")
+		_arguments -A "-*" \
+			'-M[Install the MBR]' \
+			'-f[Force update]' \
+			'-v[Verbose]' \
+			'-R[Alternate root]:alternate root:_path_files -/' \
+			'-P[Pool]:pool:_zfs_pool'
+		;;
+
+	("set-menu")
+		_arguments -A "-*" \
+			'-R[Alternate root]:alternate root:_path_files -/' \
+			'*:key=value: '
+		;;
+
+	("list-menu")
+		_arguments -A "-*" \
+			'-R[Alternate root]:alternate root:_path_files -/'
+		;;
+	esac
+}
+
+_bootadm "$@"

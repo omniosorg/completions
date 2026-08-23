@@ -1,0 +1,48 @@
+#compdef zonecfg
+# Copyright 2026 OmniOS Community Edition (OmniOSce) Association.
+
+_zonecfg() {
+	local context state line expl
+	typeset -A opt_args
+	local -a subcmds
+
+	# Sub-commands that are useful directly from the command line; the
+	# full set is generally used from within an interactive session.
+	subcmds=( create delete export info verify )
+
+	if [[ $service == "zonecfg" ]]; then
+		_arguments -C -A "-*" \
+			'-z[Zone name]:zone name:_zones -t c' \
+			'-u[Zone UUID]:zone UUID: ' \
+			'*::command:->subcmd' && return 0
+
+		if (( CURRENT == 1 )); then
+			_wanted commands expl "zonecfg subcommand" compadd -a subcmds
+			return
+		fi
+		service="$words[1]"
+		curcontext="${curcontext%:*}=$service:"
+	fi
+
+	case $service in
+	("create")
+		_arguments -A "-*" \
+			'-a[Configure a detached zone at the given path]:path:_path_files -/' \
+			'-b[Create a blank configuration]' \
+			'-F[Overwrite an existing configuration]' \
+			'-t[Use the given template]:template:_zones -t c'
+		;;
+
+	("delete")
+		_arguments -A "-*" \
+			'-F[Delete without confirmation]'
+		;;
+
+	("export")
+		_arguments -A "-*" \
+			'-f[Output file]:file:_files'
+		;;
+	esac
+}
+
+_zonecfg "$@"

@@ -21,7 +21,13 @@ bash-completion 2.18:
   named commands, such as the `-z <zone>` handling in `zones.bash`. These
   cannot be loaded on-demand and are instead sourced eagerly when
   bash-completion is initialised.
+- `zsh/` holds zsh completion functions for illumos commands which are
+  missing from, or out of date in, the zsh distribution. They are
+  installed into zsh's `site-functions` directory, which precedes the
+  version-specific function directories in `$fpath`, so a function here
+  overrides any same-named function shipped with zsh.
 
-OmniOS consumes a tagged snapshot of this branch via the `shell/bash` recipe
-in [omnios-build](https://github.com/omniosorg/omnios-build). The flat
+OmniOS consumes a tagged snapshot of this branch via the `shell/bash` and
+`shell/zsh` recipes in
+[omnios-build](https://github.com/omniosorg/omnios-build). The flat
 layout required by older OmniOS releases remains on the `master` branch.

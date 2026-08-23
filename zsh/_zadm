@@ -1,0 +1,146 @@
+#compdef zadm
+# Copyright 2026 OmniOS Community Edition (OmniOSce) Association.
+
+_zadm_brands() {
+	local -a brands expl
+
+	# The same source that zadm itself uses for the installed brand list
+	brands=( ${(f)"$(nawk -F\" '/<brand name=/ {print $2}' \
+	    /usr/lib/brand/*/config.xml 2>/dev/null)"} )
+	_description brands expl 'brand'
+	compadd "$@" "$expl[@]" -a brands
+}
+
+_zadm() {
+	local context state line expl
+	typeset -A opt_args
+	local -a subcmds
+
+	subcmds=(
+		brands console create delete doc edit fw help install list
+		list-images log login man memstat poweroff pull reset restart
+		rollback set show snapshot start stop uninstall vacuum version
+	)
+
+	if [[ $service == "zadm" ]]; then
+		_arguments -C -A "-*" \
+			'*::command:->subcmd' && return 0
+
+		if (( CURRENT == 1 )); then
+			_wanted commands expl "zadm subcommand" compadd -a subcmds
+			return
+		fi
+		service="$words[1]"
+		curcontext="${curcontext%:*}=$service:"
+	fi
+
+	case $service in
+	("create")
+		_arguments -A "-*" \
+			'-b[Brand]:brand:_zadm_brands' \
+			'-t[Template]:template:_path_files' \
+			':zone name: '
+		;;
+
+	("delete"|"install"|"uninstall")
+		_arguments -A "-*" \
+			'-f[Force]' \
+			':zone name:_zones -t c'
+		;;
+
+	("edit"|"console"|"memstat")
+		_arguments ':zone name:_zones -t c'
+		;;
+
+	("set")
+		_arguments \
+			':zone name:_zones -t c' \
+			'*:property=value: '
+		;;
+
+	("show")
+		_arguments \
+			':zone name:_zones -t c' \
+			'*:property: '
+		;;
+
+	("start")
+		_arguments -A "-*" \
+			'-c[Attach to the console]:zlogin arguments: ' \
+			':zone name:_zones -t c'
+		;;
+
+	("stop"|"restart"|"reset")
+		_arguments -A "-*" \
+			'-c[Attach to the console]:zlogin arguments: ' \
+			':zone name:_zones'
+		;;
+
+	("poweroff"|"login"|"log")
+		_arguments ':zone name:_zones'
+		;;
+
+	("fw")
+		_arguments -A "-*" \
+			'(-r --reload)'{-r,--reload}'[Reload and enable the zone firewall]' \
+			'(-d --disable)'{-d,--disable}'[Disable the zone firewall]' \
+			'(-t --top)'{-t,--top}'[Show active firewall state in a top-like view]' \
+			'(-m --monitor)'{-m,--monitor}'[Monitor firewall activity in real-time]' \
+			'(-e --edit)'{-e,--edit}'[Edit a firewall configuration file]:file:(ipf ipf6 ipnat)' \
+			':zone name:_zones -t c'
+		;;
+
+	("snapshot")
+		_arguments -A "-*" \
+			'-d[Delete the snapshot]' \
+			':zone name:_zones -t c' \
+			':snapshot name: '
+		;;
+
+	("rollback")
+		_arguments -A "-*" \
+			'-r[Restart the zone after rollback]' \
+			':zone name:_zones -t c' \
+			':snapshot name: '
+		;;
+
+	("list")
+		_arguments -A "-*" \
+			'-H[Omit headers]' \
+			'-F[Output format]:format:(json)' \
+			'-b[Filter by brand]:brand:_zadm_brands' \
+			'-s[Filter by state]:state:(configured incomplete installed ready running shutting_down down)' \
+			':zone name:_zones -t c'
+		;;
+
+	("list-images")
+		_arguments -A "-*" \
+			'--refresh[Refresh the image list]' \
+			'--verbose[Verbose output]' \
+			'-b[Filter by brand]:brand:_zadm_brands' \
+			'-p[Filter by provider]:provider: '
+		;;
+
+	("pull")
+		_arguments ':image UUID: '
+		;;
+
+	("vacuum")
+		_arguments -A "-*" \
+			'-d[Only remove images older than this]:days: '
+		;;
+
+	("doc")
+		_arguments -A "-*" \
+			'-b[Brand]:brand:_zadm_brands' \
+			'-a[Attribute]:attribute: '
+		;;
+
+	("help")
+		_arguments -A "-*" \
+			'-b[Brand]:brand:_zadm_brands'
+		;;
+	esac
+}
+
+_zadm "$@"
